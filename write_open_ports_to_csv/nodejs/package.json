@@ -1,0 +1,19 @@
+{
+  "name": "write_open_ports_to_csv",
+  "version": "1.0.0",
+  "description": "Fetch open nmap tcp and udp ports from your hostedscan account and write to a csv file.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "hostedscan",
+    "nmap"
+  ],
+  "author": "HostedScan LLC",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.22.0"
+  }
+}
