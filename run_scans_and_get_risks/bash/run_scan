@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+YELLOW=$(tput setaf 3)
+GREEN=$(tput setaf 2)
+RED=$(tput setaf 1)
+NO_COLOR=$(tput sgr0)
+
+if [[ -z "${HOSTEDSCAN_API_KEY}" ]]; then
+  echo "HOSTEDSCAN_API_KEY environment variable must be set"
+  exit 1
+fi
+
+hostedscan="https://api.hostedscan.com/v1"
+key_header="x-hostedscan-api-key: $HOSTEDSCAN_API_KEY"
+content_header="Content-Type: application/json"
+target="https://expired.badssl.com"
+
+
+# 1. Start a New Scan
+scan_id=$(curl -s -H "$key_header" -H "$content_header" --data '{ "targets": ["'$target'"], "type": "SSLYZE" }' $hostedscan/scans | jq -r .data.id)
+if [ ! "$scan_id" ]; then
+  echo "Error creating a new scan. Please check that your API key is correct."
+  exit -1
+fi
+echo "Started Scan with id: $scan_id"
+
+
+# 2. Wait for the Scan to Finish
+echo "Waiting for Scan to finish running..."
+scan=$(curl -s -H "$key_header" $hostedscan/scans/$scan_id)
+scan_state=$(jq -r .data.state <<< "$scan")
+while [ "$scan_state" != "SUCCEEDED" ]; do
+  echo "Scan state: $scan_state. Sleeping 15 seconds..."
+  sleep 30
+  scan=$(curl -s -H "$key_header" $hostedscan/scans/$scan_id)
+  scan_state=$(jq -r .data.state <<< "$scan")
+done
+echo "Scan state: $scan_state. Scan finished!"
+echo
+
+
+# 3. Get the Risks
+function get_risks() {
+  risk_uris=$(jq -r '.[] | ["'$hostedscan'/risks/\(.risk_id)"] | join(" ")' <<< "$1")
+
+  if [ "$risk_uris" ]; then
+    curl -s -H "$key_header" $risk_uris |
+    jq -s -r '.[] | [.data.risk_definition.threat_level, "(is_accepted: \(.data.is_accepted))", .data.risk_definition.title] | @tsv'
+  fi
+}
+
+new_open_count=$(jq -r '.data.risks.new_open | length' <<< "$scan")
+still_open_count=$(jq -r '.data.risks.still_open | length' <<< "$scan")
+closed_count=$(jq -r '.data.risks.closed | length' <<< "$scan")
+
+echo "${RED}$new_open_count New Open Risks${NO_COLOR}"
+echo
+new_open=$(jq -r .data.risks.new_open <<< "$scan")
+get_risks "$new_open"
+echo
+
+echo "${YELLOW}$still_open_count Still Open Risks${NO_COLOR}"
+echo
+still_open=$(jq -r .data.risks.still_open <<< "$scan")
+get_risks "$still_open"
+echo
+
+echo "${GREEN}$closed_count Closed Risks${NO_COLOR}"
+echo
+closed=$(jq -r .data.risks.closed <<< "$scan")
+get_risks "$closed"
+echo
