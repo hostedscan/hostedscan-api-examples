@@ -104,3 +104,24 @@ Once the Scan is finished (in the SUCCEEDED state), the Scan object contains the
 The Risks are grouped into 3 categories: `new_open`, `still_open`, and `closed`. `new_open` are Risks that were detected for the first time in this Scan. `still_open` are Risks that were detected in previous Scans and still detected in this Scan. `closed` are Risks that were detected in previous Scans and not detected in this Scan.
 
 To get the full information about each Risk, you call the [Get Risks(s)](https://docs.hostedscan.com/api/scans/get-risks) endpoint. The response is a Risk object, which contains the details such as the title, threat_level, and the is_accepted flag.
+
+### 4. Download the PDF Scan Result file
+
+The Scan object contains a list of result file formats and ids:
+
+```
+"results":[
+  {
+    "result_id":"627855c972c53e004090c163",
+    "content_type":"application/json"
+  },
+  {
+    "result_id":"627855c972c53e004090c162",
+    "content_type":"text/html"
+  },
+  {
+    "result_id":"627855c972c53e004090c164",
+    "content_type":"application/pdf"
+  }
+]
+```

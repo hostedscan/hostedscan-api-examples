@@ -69,3 +69,9 @@ echo
 closed=$(jq -r .data.risks.closed <<< "$scan")
 get_risks "$closed"
 echo
+
+# 4. Download the Scan Result PDF
+pdf_result_id=$(jq -r '.data.results[] | select(.content_type == "application/pdf") | .result_id' <<< "$scan")
+echo "PDF result id: $pdf_result_id"
+curl -o result.pdf -H "$key_header" --request GET "https://api.hostedscan.com/v1/results/$pdf_result_id"
+echo "PDF result saved as result.pdf"
