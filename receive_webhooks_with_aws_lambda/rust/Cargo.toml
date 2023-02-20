@@ -1,0 +1,16 @@
+[package]
+name = "hostedscan-webhooks"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+hex = "0.4.3"
+hex-literal = "0.3.4"
+hmac = "0.12.1"
+lambda_http = "0.7.3"
+serde = "1.0.152"
+serde_json = "1.0.93"
+sha2 = "0.10.6"
+tokio = "1.25.0"

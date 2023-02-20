@@ -11,3 +11,7 @@ This example shows a typical flow for running a new vulnerability scan and analy
 ### Write Open Ports to CSV
 
 This example shows how to retrieve all of the open ports found by HostedScan and write them to a CSV file.
+
+### Receive Wehbook Messages
+
+This example shows how to receive webhook events from HostedScan using AWS Lambda.

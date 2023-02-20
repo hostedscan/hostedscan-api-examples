@@ -1,0 +1,7 @@
+{
+  "headers": {
+    "x-hostedscan-timestamp": "1676612345678",
+    "x-hostedscan-signature": "cb0c1ac61d1f0e450afea0ed0620c156870e45abfeaf798accbe905c64ce7c50"
+  },
+  "body": "{\"id\":\"an-event-id\",\"type\":\"risk.opened\",\"data\":{\"id\":\"a-risk-id\",\"target\":\"test.com\",\"risk_definition\":{\"scan_type\":\"OWASP_ZAP\",\"title\":\"example risk\",\"description\":\"example description\",\"solution\":\"example solution\",\"threat_level\":\"LOW\"}}}"
+}

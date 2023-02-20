@@ -1,0 +1,34 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  # For production, consider using Secrets Manager instead of template parameters
+  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/dynamic-references.html#dynamic-references-secretsmanager
+  WebhooksSigningSecret:
+    Type: String
+    Default: example-secret
+    Description: Signing secret for the webhook endpoint registered with HostedScan
+
+Resources:
+  HostedScanWebhooksFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Architectures: ['x86_64']
+      MemorySize: 128
+      Handler: bootstrap
+      Runtime: provided.al2
+      CodeUri: .
+      FunctionUrlConfig:
+        AuthType: NONE
+      Environment:
+        Variables:
+          SIGNING_SECRET:
+            Ref: WebhooksSigningSecret
+
+    Metadata:
+      BuildMethod: makefile
+
+Outputs:
+  HostedScanWebhooksFunctionUrl:
+    Value:
+      Fn::GetAtt HostedscanWebhooksFunction.FunctionUrl
