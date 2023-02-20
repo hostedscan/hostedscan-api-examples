@@ -12,12 +12,12 @@ The example code verifies the signatures of webhook messages. This is a security
 
 ## Test locally with the SAM cli
 
-`sam build`
-`sam local invoke -e test_data/risk_opened.json`
+- `sam build`
+- `sam local invoke -e test_data/risk_opened.json`
 
 The there 3 different test events in the /test_data folder: risk_opened.json, risk_closed.json, and scan_succeeded.json
 
 ## Deploy to AWS Lambda with SAM cli
 
-`sam build`
-`sam deploy --stack-name << desired stack name >> --capabilities CAPABILITY_IAM`
+- `sam build`
+- `sam deploy --stack-name << desired stack name >> --capabilities CAPABILITY_IAM`
