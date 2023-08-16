@@ -13,7 +13,7 @@ The example code verifies the signatures of webhook messages. This is an industr
 ## Test locally with the SAM cli
 
 - `sam build`
-- `sam local invoke -e test_data/risk_opened.json`
+- `sam local invoke -e test_data/risk_created.json`
 
 The there 3 different test events in the /test_data folder: risk_opened.json, risk_closed.json, and scan_succeeded.json
 

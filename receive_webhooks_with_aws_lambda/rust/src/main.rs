@@ -9,33 +9,35 @@ type HmacSha256 = Hmac<Sha256>;
 const HOSTEDSCAN_SIGNATURE_HEADER: &str = "X-HOSTEDSCAN-SIGNATURE";
 const HOSTEDSCAN_TIMESTAMP_HEADER: &str = "X-HOSTEDSCAN-TIMESTAMP";
 
-// See https://docs.hostedscan.com/webhooks/event-types for event type definitions
+// See https://docs.hostedscan.com/ for full event type definitions and all available fields
 #[derive(Deserialize, Debug)]
 #[serde(tag = "type")]
 enum HostedScanEvent {
-    #[serde(rename = "risk.opened")]
-    RiskOpened(RiskOpenedOrClosedEvent),
-    #[serde(rename = "risk.closed")]
-    RiskClosed(RiskOpenedOrClosedEvent),
-    #[serde(rename = "scan.succeeded")]
-    ScanSucceeded(ScanSucceededEvent),
+    #[serde(rename = "risk.created")]
+    RiskCreated(RiskEvent),
+    #[serde(rename = "risk.updated")]
+    RiskUpdated(RiskEvent),
+    #[serde(rename = "scan.created")]
+    ScanCreated(ScanEvent),
+    #[serde(rename = "scan.updated")]
+    ScanUpdated(ScanEvent),
 }
 
 #[derive(Deserialize, Debug)]
-struct RiskOpenedOrClosedEvent {
-    data: RiskOpenedOrClosedData,
+struct RiskEvent {
+    data: RiskData,
 }
 
 #[derive(Deserialize, Debug)]
-struct RiskOpenedOrClosedData {
+struct RiskData {
     id: String,
     target: String,
     risk_definition: RiskDefinition,
 }
 
 #[derive(Deserialize, Debug)]
-struct ScanSucceededEvent {
-    data: ScanSucceededData,
+struct ScanEvent {
+    data: ScanData,
 }
 
 #[derive(Deserialize, Debug)]
@@ -50,7 +52,7 @@ struct RiskDefinition {
 }
 
 #[derive(Deserialize, Debug)]
-struct ScanSucceededData {
+struct ScanData {
     id: String,
     #[serde(rename = "type")]
     scan_type: String,
@@ -68,6 +70,7 @@ async fn handler(request: Request) -> Result<Response<Body>, Error> {
         let signature = request.headers().get(HOSTEDSCAN_SIGNATURE_HEADER).ok_or("missing signature header")?;
         let timestamp = request.headers().get(HOSTEDSCAN_TIMESTAMP_HEADER).ok_or("missing timestamp header")?;
         let body = std::str::from_utf8(request.body()).or(Err("invalid utf-8 sequence"))?;
+        println!("{}", body);
         
         // Verify the webhook signature
         let secret = env::var("SIGNING_SECRET").or(Err("no signing secret configured"))?;
@@ -84,15 +87,23 @@ async fn handler(request: Request) -> Result<Response<Body>, Error> {
         // Handle the event
         let event = serde_json::from_str::<HostedScanEvent>(body).or(Err("not a valid hostedscan event"))?;
         match event {
-            HostedScanEvent::RiskOpened(e) => {
-                println!("Risk opened for target [{}] with id [{}], title [{}], and severity [{}]", e.data.target, e.data.id, e.data.risk_definition.title, e.data.risk_definition.threat_level);
+            HostedScanEvent::RiskCreated(e) => {
+                println!("Risk created for target [{}] with id [{}], title [{}], and severity [{}]", e.data.target, e.data.id, e.data.risk_definition.title, e.data.risk_definition.threat_level);
                 println!("Full event {:?}", e);
                 // Open ticket or send other notifications here. Use the id to de-duplicate.
             }
-            HostedScanEvent::RiskClosed(e) => {
-                println!("Risk closed for target [{}] with id [{}]", e.data.target, e.data.id);
+            HostedScanEvent::RiskUpdated(e) => {
+                println!("Risk updated for target [{}] with id [{}]", e.data.target, e.data.id);
                 println!("Full event {:?}", e);
-                // Close ticket or send other notifications here. Use the id to de-duplicate.
+                // Update/Close ticket or send other notifications here. Use the id to de-duplicate.
+            }
+            HostedScanEvent::ScanCreated(e) => {
+                println!("Scan created for type [{}] with id [{}]", e.data.scan_type, e.data.id);
+                println!("Full event {:?}", e);
+            }
+            HostedScanEvent::ScanUpdated(e) => {
+                println!("Scan updated for type [{}] with id [{}]", e.data.scan_type, e.data.id);
+                println!("Full event {:?}", e);
             }
             _ => {
                 // Do nothing for any other event types

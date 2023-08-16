@@ -1,7 +1,0 @@
-{
-  "headers": {
-    "x-hostedscan-timestamp": "1676612345678",
-    "x-hostedscan-signature": "2e28b353d5e7bbe7e38f64768169ff168127dfd1bad98bca1f5a322b5f6a5bad"
-  },
-  "body": "{\"id\":\"an-event-id\",\"type\":\"scan.succeeded\",\"data\":{\"id\":\"a-scan-id\",\"type\":\"OWASP_ZAP\"}}"
-}
